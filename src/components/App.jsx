@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm';
 import Filter from './Filter';
 import ContactList from './ContactList';
-import appStyles from "./App.module.css";
+import appStyles from './App.module.css';
 
 class App extends Component {
   state = {
@@ -16,21 +16,23 @@ class App extends Component {
     filter: '',
   };
 
-  addContact = (name, number) => {
-    if (
-      this.state.contacts.some(
-        contact => contact.name.toLowerCase() === name.toLowerCase()
-      )
-    ) {
+  addContact = ({ name, number }) => {
+  
+    const contactExists = this.state.contacts.find(
+      ({ name: contactName }) =>
+        contactName.toLowerCase() === name.toLowerCase()
+    );
+
+    if (contactExists) {
       alert(`${name} is already in contact list.`);
       return;
     }
 
-    this.setState(prevState => {
-      return {
-        contacts: [...prevState.contacts, { name, number, id: nanoid() }],
-      };
-    });
+    const newContact = { name, number, id: nanoid() };
+
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, newContact],
+    }));
   };
 
   onChangeFilter = evt => {
@@ -45,14 +47,12 @@ class App extends Component {
     });
   };
 
-  deleteContact = evt => {
-    const toDeleteContactId = evt.target.value;
-    console.log(toDeleteContactId);
-
+  deleteContact = id => {
+   
     this.setState(prevState => {
       const contacts = prevState.contacts;
       const newContacts = contacts.filter(contact => {
-        return contact.id !== toDeleteContactId;
+        return contact.id !== id;
       });
       return {
         contacts: newContacts,
@@ -61,10 +61,10 @@ class App extends Component {
   };
 
   render() {
-    const { contacts, filter } = this.state;
-    const filteredContacts = this.getFilteredContacts(contacts, filter);
+    const { filter } = this.state;
+    const filteredContacts = this.getFilteredContacts();
     return (
-      <div className={ appStyles.container}>
+      <div className={appStyles.container}>
         <h1>Phonebook</h1>
         <ContactForm addContact={this.addContact} />
 
